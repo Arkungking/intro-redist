@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Sample {
+  id        Int      @id @default(autoincrement())
+  name      String
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("samples")
+}
+
+model Ticket {
+  id        Int       @id @default(autoincrement())
+  name      String
+  price     Int
+  stock     Int
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  transactionDetails TransactionDetail[]
+
+  @@map("tickets")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+
+  @@map("users")
+}
+
+model Transaction {
+  id           Int               @id @default(autoincrement())
+  uuid         String            @unique @default(uuid())
+  userId       Int
+  user         User              @relation(fields: [userId], references: [id])
+  status       TransactionStatus @default(WAITING_FOR_PAYMENT)
+  paymentProof String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  transactionDetails TransactionDetail[]
+
+  @@map("transactions")
+}
+
+enum TransactionStatus {
+  WAITING_FOR_PAYMENT
+  WAITING_FOR_CONFIRMATION
+  PAID
+  REJECT
+  EXPIRED
+}
+
+model TransactionDetail {
+  id            Int         @id @default(autoincrement())
+  transactionId Int
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  ticketId      Int
+  ticket        Ticket      @relation(fields: [ticketId], references: [id])
+  qty           Int
+  price         Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("transaction_details")
+}
