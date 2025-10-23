@@ -5,6 +5,8 @@ import { SampleRouter } from "./modules/sample/sample.router";
 import { PORT } from "./config/env";
 import { initScheduler } from "./script";
 import { TransactionRouter } from "./modules/transaction/transaction.router";
+import { AuthRouter } from "./modules/auth/auth.router";
+import { initWorkers } from "./workers";
 
 export class App {
   app: Express;
@@ -14,7 +16,8 @@ export class App {
     this.configure();
     this.routes();
     this.handleError();
-    initScheduler()
+    initScheduler();
+    initWorkers();
   }
 
   private configure() {
@@ -25,9 +28,11 @@ export class App {
   private routes() {
     const sampleRouter = new SampleRouter();
     const transactionRouter = new TransactionRouter();
+    const authRouter = new AuthRouter();
 
     this.app.use("/samples", sampleRouter.getRouter());
-    this.app.use("/transaction", transactionRouter.getRouter());
+    this.app.use("/transactions", transactionRouter.getRouter());
+    this.app.use("/auth", authRouter.getRouter());
   }
 
   private handleError() {

@@ -36,12 +36,18 @@ model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
+  role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   transactions Transaction[]
 
   @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
 }
 
 model Transaction {

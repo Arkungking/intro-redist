@@ -1,12 +1,15 @@
 import { ApiError } from "../../utils/api-error";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateTransactionDTO } from "./dto/create-transaction.dto";
+import { TransactionQueue } from "./transaction.queue";
 
 export class TransactionService {
   private prisma: PrismaService;
+  private transactioQueue: TransactionQueue;
 
   constructor() {
     this.prisma = new PrismaService();
+    this.transactioQueue = new TransactionQueue();
   }
 
   createTransaction = async (
@@ -67,6 +70,8 @@ export class TransactionService {
     });
 
     // 7. TODO: send email for user to upload payment proof
+    // 8. buat dealy queue
+    await this.transactioQueue.addNewTransaction(result.uuid);
 
     return { message: "create transcation success" };
   };
