@@ -1,4 +1,6 @@
+import { TransactionStatus } from "../../generated/prisma";
 import { ApiError } from "../../utils/api-error";
+import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateTransactionDTO } from "./dto/create-transaction.dto";
 import { TransactionQueue } from "./transaction.queue";
@@ -6,10 +8,12 @@ import { TransactionQueue } from "./transaction.queue";
 export class TransactionService {
   private prisma: PrismaService;
   private transactioQueue: TransactionQueue;
+  private cloudinaryService: CloudinaryService;
 
   constructor() {
     this.prisma = new PrismaService();
     this.transactioQueue = new TransactionQueue();
+    this.cloudinaryService = new CloudinaryService();
   }
 
   createTransaction = async (
@@ -75,4 +79,47 @@ export class TransactionService {
 
     return { message: "create transcation success" };
   };
+
+  uploadPaymentProof = async (
+    uuid: string,
+    paymentproof: Express.Multer.File,
+    authUserId: number
+  ) => {
+    // cari dulu transaksi berdasarkan uuid
+    const transaction = await this.prisma.transaction.findFirst({
+      where: { uuid },
+    });
+    // kalo ngga ada throw error
+    if (!transaction) {
+      throw new ApiError("Invalid transaction uuid", 400);
+    }
+    // kalo ada cek juga userId di data transaksi, apakah sama dengan authUserId dari sisi token
+    // kalo tidak sama throw error
+    if (transaction.userId !== authUserId) {
+      throw new ApiError("Forbidden", 403);
+    }
+
+    const allowedStatus: TransactionStatus[] = [
+      "WAITING_FOR_CONFIRMATION",
+      "WAITING_FOR_PAYMENT",
+    ];
+
+    if (!allowedStatus.includes(transaction.status)) {
+      throw new ApiError("Invalid transaction status", 400);
+    }
+    // kalo udah ada paymentProof sebelumnya, dihapus dulu
+    if (transaction.paymentProof) {
+      await this.cloudinaryService.remove(transaction.paymentProof)
+    }
+    // upload paymenProof ke cloudinary
+    const { secure_url } = await this.cloudinaryService.upload(paymentproof);
+    // update data status transaksi menjadi WAITING_FOR CONFIRMATION & isi kolom payment proof dengan secure_url dari cloudinary
+    await this.prisma.transaction.update({
+      where: { id: transaction.id },
+      data: { status: "WAITING_FOR_CONFIRMATION", paymentProof: secure_url },
+    });
+  };
+
+  acceptTransaction = async () => {};
+  rejectTransaction = async () => {};
 }

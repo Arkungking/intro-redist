@@ -4,7 +4,7 @@ import { fromBuffer } from "file-type";
 import core from "file-type/core";
 import { ApiError } from "../utils/api-error";
 
-export class UploaderMiddlwarre {
+export class UploaderMiddleware {
   upload = () => {
     const storage = multer.memoryStorage();
 
