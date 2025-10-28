@@ -10,6 +10,14 @@ services:
     ports:
       - "6543:5432"
 
+  db_testing:
+    image: postgres
+    container_name: postgres_container2
+    environment:
+      - POSTGRES_PASSWORD=admin
+    ports:
+      - "6544:5432"
+
   cache:
     image: redis
     container_name: redis_container

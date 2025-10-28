@@ -8,6 +8,7 @@ import { ForgotPasswordDTO } from "./dto/forgot-password.dto";
 import { LoginDTO } from "./dto/login.dto";
 import { RegisterDTO } from "./dto/register.dto";
 import { sign } from "jsonwebtoken";
+import { ResetPasswordDTO } from "./dto/reset-password.dto";
 
 export class AuthService {
   private prisma: PrismaService;
@@ -81,5 +82,24 @@ export class AuthService {
       "reset-password",
       { link: `${BASE_URL_FE}/reset-password/${token}` }
     );
+  };
+
+  resetPassword = async (body: ResetPasswordDTO, authUserId: number) => {
+    const user = await this.prisma.user.findFirst({
+      where: { id: authUserId },
+    });
+
+    if (!user) {
+      throw new ApiError("invalid user id", 400);
+    }
+
+    const hashedPassword = await hashPassword(body.password);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    });
+
+    return { message: "reset password success" };
   };
 }
