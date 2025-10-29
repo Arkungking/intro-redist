@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 
+const envFile = process.env.TEST_TYPE
 dotenv.config();
 
 export const PORT = process.env.PORT

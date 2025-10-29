@@ -6,7 +6,7 @@
     "build": "tsc",
     "start": "npm run build && node dist/index.js",
     "dev": "nodemon src/index.ts",
-    "test:integration": "jest --runInBand --detectOpenHandles --forceExit"
+    "test:integration": "cross-env TEST_TYPE=integration jest --runInBand --detectOpenHandles --forceExit"
   },
   "keywords": [],
   "author": "",
@@ -40,6 +40,7 @@
     "cors": "^2.8.5",
     "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
+    "dotenv-flow": "^4.1.0",
     "express": "^5.1.0",
     "file-type": "^16.5.4",
     "handlebars": "^4.7.8",

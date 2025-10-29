@@ -1,9 +1,12 @@
+import { count } from "console";
 import { TransactionStatus } from "../../generated/prisma";
 import { ApiError } from "../../utils/api-error";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateTransactionDTO } from "./dto/create-transaction.dto";
+import { GetTransactionDTO } from "./dto/get-transaction.dto";
 import { TransactionQueue } from "./transaction.queue";
+import { Prisma } from "../../generated/prisma";
 
 export class TransactionService {
   private prisma: PrismaService;
@@ -15,6 +18,38 @@ export class TransactionService {
     this.transactioQueue = new TransactionQueue();
     this.cloudinaryService = new CloudinaryService();
   }
+
+  getTransactions = async (query: GetTransactionDTO, authUserId: number) => {
+    const { page, take, sortBy, sortOrder, search, status } = query;
+
+    const whereClause: Prisma.TransactionWhereInput = {
+      userId: authUserId,
+    };
+
+    if (search) {
+      whereClause.uuid = { contains: search, mode: "insensitive" };
+    }
+
+    if (status) {
+      whereClause.status = status
+    }
+
+    const transaction = await this.prisma.transaction.findMany({
+      where: whereClause,
+      orderBy: { [sortBy]: sortOrder },
+      skip: (page - 1) * take,
+      take: take,
+    });
+
+    const count = await this.prisma.transaction.count({
+      where: whereClause,
+    });
+
+    return {
+      data: transaction,
+      meta: { page, take, total: count },
+    };
+  };
 
   createTransaction = async (
     body: CreateTransactionDTO,
@@ -109,7 +144,7 @@ export class TransactionService {
     }
     // kalo udah ada paymentProof sebelumnya, dihapus dulu
     if (transaction.paymentProof) {
-      await this.cloudinaryService.remove(transaction.paymentProof)
+      await this.cloudinaryService.remove(transaction.paymentProof);
     }
     // upload paymenProof ke cloudinary
     const { secure_url } = await this.cloudinaryService.upload(paymentproof);

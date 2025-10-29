@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { TransactionService } from "./transaction.service";
 import { ApiError } from "../../utils/api-error";
+import { plainToInstance } from "class-transformer";
+import { GetTransactionDTO } from "./dto/get-transaction.dto";
 
 export class TransactionController {
   private transactionService: TransactionService;
@@ -28,6 +30,16 @@ export class TransactionController {
     const result = await this.transactionService.uploadPaymentProof(
       uuid,
       paymentProof,
+      authUserId
+    );
+    res.status(200).send(result);
+  };
+
+  getTransactions = async (req: Request, res: Response) => {
+    const query = plainToInstance(GetTransactionDTO, req.query);
+    const authUserId = Number(res.locals.user.id);
+    const result = await this.transactionService.getTransactions(
+      query,
       authUserId
     );
     res.status(200).send(result);

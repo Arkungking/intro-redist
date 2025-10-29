@@ -22,13 +22,18 @@ export class TransactionRouter {
   }
 
   private initializedRoutes = () => {
+    this.router.get(
+      "/",
+      this.jwtMiddleware.verifyToken(JWT_SECRET!),
+      this.jwtMiddleware.verifyRole(["USER"]),
+      this.transactionController.getTransactions
+    );
     this.router.post(
       "/",
       this.jwtMiddleware.verifyToken(JWT_SECRET!),
       this.jwtMiddleware.verifyRole(["USER"]),
       this.transactionController.createTransaction
     );
-
     this.router.patch(
       "/payment-proof",
       this.jwtMiddleware.verifyToken(JWT_SECRET!),

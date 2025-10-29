@@ -1,3 +1,4 @@
+require("dotenv-flow").config();
 const { createDefaultPreset } = require("ts-jest");
 
 const tsJestTransformCfg = createDefaultPreset().transform;
