@@ -41,6 +41,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   transactions Transaction[]
+  blogs         Blog[]
 
   @@map("users")
 }
@@ -85,4 +86,20 @@ model TransactionDetail {
   updatedAt     DateTime    @updatedAt
 
   @@map("transaction_details")
+}
+
+model Blog {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  title       String   @unique
+  description String   @db.Text
+  thumbnail   String
+  content     String   @db.Text
+  category    String
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("blogs")
 }
