@@ -15,4 +15,17 @@ export class BlogController {
     const result = await this.blogService.getBlogs(query);
     res.status(200).send(result);
   };
+
+  createBlog = async (req: Request, res: Response) => {
+    const body = req.body;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const thumbnail = files.thumbnail?.[0];
+    const authUserId = Number(res.locals.user.id);
+    const result = await this.blogService.createBlog(
+      body,
+      thumbnail,
+      authUserId
+    );
+    res.status(200).send(result);
+  };
 }
