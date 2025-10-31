@@ -3,10 +3,10 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 import cors from "cors";
 import { SampleRouter } from "./modules/sample/sample.router";
 import { PORT } from "./config/env";
-import { initScheduler } from "./script";
-import { TransactionRouter } from "./modules/transaction/transaction.router";
+// import { initScheduler } from "./script";
+// import { TransactionRouter } from "./modules/transaction/transaction.router";
 import { AuthRouter } from "./modules/auth/auth.router";
-import { initWorkers } from "./workers";
+// import { initWorkers } from "./workers";
 import { BlogRouter } from "./modules/blog/blog.router";
 
 export class App {
@@ -17,8 +17,8 @@ export class App {
     this.configure();
     this.routes();
     this.handleError();
-    initScheduler();
-    initWorkers();
+    // initScheduler();
+    // initWorkers();
   }
 
   private configure() {
@@ -28,12 +28,12 @@ export class App {
 
   private routes() {
     const sampleRouter = new SampleRouter();
-    const transactionRouter = new TransactionRouter();
+    // const transactionRouter = new TransactionRouter();
     const authRouter = new AuthRouter();
     const blogRouter = new BlogRouter();
 
     this.app.use("/samples", sampleRouter.getRouter());
-    this.app.use("/transactions", transactionRouter.getRouter());
+    // this.app.use("/transactions", transactionRouter.getRouter());
     this.app.use("/auth", authRouter.getRouter());
     this.app.use("/blogs", blogRouter.getRouter());
   }
